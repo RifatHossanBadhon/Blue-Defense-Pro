@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Defense</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@200;300;400;600&display=swap');
+
+        /* ── RESET & GLOBAL ─────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            background-color: #020508;
+            color: #cce8f4;
+            font-family: 'Exo 2', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body {
+            background-image:
+                linear-gradient(rgba(0, 200, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 200, 255, 0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Radial glow overlays */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(0, 200, 255, 0.04) 0%, transparent 70%),
+                radial-gradient(ellipse at 100% 100%, rgba(255, 45, 85, 0.03) 0%, transparent 60%);
+        }
+
+        /* ── TOPBAR ─────────────────────────────────────────── */
+        .topbar {
+            position: relative;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            height: 64px;
+            flex-shrink: 0;
+            background: rgba(5, 13, 20, 0.95);
+            border-bottom: 1px solid rgba(0, 180, 255, 0.12);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 4px;
+            color: #00c8ff;
+            text-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+        }
+
+        .logo-sub {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #2d5070;
+            letter-spacing: 2px;
+            margin-top: 2px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #6a9ab8;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff2d55;
+            box-shadow: 0 0 8px #ff2d55;
+            animation: pulseDot 2s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 8px #ff2d55;
+            }
+
+            50% {
+                opacity: 0.5;
+                box-shadow: 0 0 3px #ff2d55;
+            }
+        }
+
+        .topbar-time {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #2d5070;
+        }
+
+        /* ── APP LAYOUT ─────────────────────────────────────── */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ── SIDEBAR ─────────────────────────────────────────── */
+        .sidebar {
+            background-color: #080f1a;
+            border-right: 1px solid rgba(0, 180, 255, 0.12);
+            width: 220px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-section-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: #2d5070;
+            padding: 20px 20px 10px;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 1px;
+            color: #6a9ab8;
+            background: none;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            color: #00c8ff;
+            background: rgba(0, 200, 255, 0.04);
+        }
+
+        .nav-item.active {
+            color: #00c8ff;
+            background: rgba(0, 200, 255, 0.08);
+            border-left: 3px solid #00c8ff;
+            box-shadow: inset 0 0 8px rgba(0, 200, 255, 0.05);
+        }
+
+        .db-status-block {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #2d5070;
+            padding: 16px 20px;
+            border-top: 1px solid rgba(0, 180, 255, 0.12);
+            line-height: 2;
+            margin-top: auto;
+        }
+
+        .db-status-block span {
+            color: #ff2d55;
+        }
+
+        .db-status-block .disconnected {
+            color: #ff2d55;
+        }
+
+        /* ── MAIN CONTENT ────────────────────────────────────── */
+        .main-content {
+            padding: 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── PAGE HEADER ─────────────────────────────────────── */
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0, 180, 255, 0.12);
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+            letter-spacing: 3px;
+            color: #cce8f4;
+        }
+
+        .page-title span {
+            color: #00c8ff;
+        }
+
+        .page-title .red {
+            color: #ff2d55;
+        }
+
+        .page-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #2d5070;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* ── BUTTONS ─────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.15), rgba(0, 255, 204, 0.08));
+            border: 1px solid rgba(0, 200, 255, 0.35);
+            color: #00c8ff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 2px;
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 25px rgba(0, 200, 255, 0.25);
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.25), rgba(0, 255, 204, 0.15));
+            border-color: #00c8ff;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        /* ── METRIC CARDS ────────────────────────────────────── */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: #0a1520;
+            border: 1px solid rgba(0, 180, 255, 0.12);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .metric-card:hover {
+            border-color: rgba(0, 200, 255, 0.35);
+            background: #0d1c2a;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--ca, #00c8ff);
+            box-shadow: 0 0 12px var(--ca, #00c8ff);
+            opacity: 0.8;
+        }
+
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--ca, #00c8ff);
+            opacity: 0.03;
+            filter: blur(20px);
+        }
+
+        .metric-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: #2d5070;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 38px;
+            letter-spacing: 2px;
+            line-height: 1;
+            text-shadow: 0 0 20px var(--ca, #00c8ff);
+        }
+
+        .metric-delta {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #00ffcc;
+            margin-top: 6px;
+        }
+
+        /* ── PANELS ──────────────────────────────────────────── */
+        .panel {
+            background: #0a1520;
+            border: 1px solid rgba(0, 180, 255, 0.12);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(0, 180, 255, 0.12);
+            background: rgba(0, 200, 255, 0.03);
+        }
+
+        .panel-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 3px;
+            color: #6a9ab8;
+            text-transform: uppercase;
+        }
+
+        .panel-badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #2d5070;
+            padding: 3px 8px;
+            border: 1px solid rgba(0, 180, 255, 0.12);
+        }
+
+        /* ── TABLES ──────────────────────────────────────────── */
+        .st {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+        }
+
+        .st thead th {
+            padding: 10px 16px;
+            text-align: left;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: #2d5070;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(0, 180, 255, 0.12);
+            background: rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+        }
+
+        .st tbody tr {
+            border-bottom: 1px solid rgba(0, 200, 255, 0.04);
+            transition: background 0.2s;
+        }
+
+        .st tbody tr:hover {
+            background: rgba(0, 200, 255, 0.04);
+        }
+
+        .st tbody td {
+            padding: 10px 16px;
+            color: #6a9ab8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
+        }
+
+        /* ── TYPE BADGES & SEVERITY ──────────────────────────── */
+        .tb {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            font-weight: 600;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .tb-ip {
+            background: rgba(0, 200, 255, 0.12);
+            color: #00c8ff;
+            border: 1px solid rgba(0, 200, 255, 0.25);
+        }
+
+        .tb-url {
+            background: rgba(255, 107, 26, 0.12);
+            color: #ff6b1a;
+            border: 1px solid rgba(255, 107, 26, 0.25);
+        }
+
+        .tb-hash {
+            background: rgba(0, 255, 204, 0.12);
+            color: #00ffcc;
+            border: 1px solid rgba(0, 255, 204, 0.25);
+        }
+
+        .tb-domain {
+            background: rgba(255, 193, 7, 0.12);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.25);
+        }
+
+        .sc {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .sc-crit {
+            color: #ff2d55;
+            background: rgba(255, 45, 85, 0.1);
+            border: 1px solid rgba(255, 45, 85, 0.3);
+        }
+
+        .sc-high {
+            color: #ff6b1a;
+            background: rgba(255, 107, 26, 0.1);
+            border: 1px solid rgba(255, 107, 26, 0.3);
+        }
+
+        .sc-med {
+            color: #ffc107;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .sc-low {
+            color: #00c8ff;
+            background: rgba(0, 200, 255, 0.1);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+        }
+
+        /* ── PROGRESS BARS ───────────────────────────────────── */
+        .cfbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cft {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+
+        .cff {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 1s ease;
+        }
+
+        .cf-hi {
+            background: #00ffcc;
+            box-shadow: 0 0 6px #00ffcc;
+        }
+
+        .cf-md {
+            background: #ffc107;
+        }
+
+        .cf-lo {
+            background: #ff6b1a;
+        }
+
+        .zbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .zt {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .zf {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b1a, #ff2d55);
+            box-shadow: 0 0 6px #ff2d55;
+        }
+
+        /* ── SEARCH INPUT ────────────────────────────────────── */
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: #0a1520;
+            border: 1px solid rgba(0, 180, 255, 0.12);
+            color: #cce8f4;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            padding: 16px 20px;
+            outline: none;
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-input::placeholder {
+            color: #2d5070;
+        }
+
+        .search-input:focus {
+            border-color: rgba(0, 200, 255, 0.35);
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.1);
+        }
+
+        /* ── RESULT FIELDS ───────────────────────────────────── */
+        .rf {
+            background: #0a1520;
+            border: 1px solid rgba(0, 180, 255, 0.12);
+            padding: 16px;
+        }
+
+        .rl {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #2d5070;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .rv {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: #00c8ff;
+            word-break: break-all;
+        }
+
+        .no-result {
+            text-align: center;
+            padding: 60px;
+            font-family: 'Share Tech Mono', monospace;
+            color: #2d5070;
+            border: 1px dashed rgba(0, 180, 255, 0.12);
+        }
+
+        .nr-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+            display: block;
+        }
+
+        /* ── ALERTS & ACTIVITY ───────────────────────────────── */
+        .alert-strip {
+            background: rgba(255, 45, 85, 0.06);
+            border: 1px solid rgba(255, 45, 85, 0.2);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #ff2d55;
+            animation: alertPulse 3s ease-in-out infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes alertPulse {
+
+            0%,
+            100% {
+                border-color: rgba(255, 45, 85, 0.2);
+            }
+
+            50% {
+                border-color: rgba(255, 45, 85, 0.5);
+                box-shadow: 0 0 15px rgba(255, 45, 85, 0.1);
+            }
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.04);
+        }
+
+        .activity-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .activity-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #6a9ab8;
+            line-height: 1.6;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .activity-time {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #2d5070;
+            padding-top: 2px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        /* ── CHARTS ──────────────────────────────────────────── */
+        .chart-outer {
+            padding: 24px;
+        }
+
+        .chart-sublabel {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #2d5070;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+
+        .chart-wrap {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 100px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            position: relative;
+            min-width: 6px;
+            border-top: 2px solid rgba(0, 200, 255, 0.5);
+            background: rgba(0, 200, 255, 0.15);
+            transition: height 0.5s;
+        }
+
+        .chart-bar.spike {
+            background: rgba(255, 45, 85, 0.25);
+            border-top-color: #ff2d55;
+            box-shadow: 0 0 12px rgba(255, 45, 85, 0.3);
+        }
+
+        .chart-bar .lbl {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            color: #2d5070;
+            white-space: nowrap;
+        }
+
+        .chart-bar.spike .lbl {
+            color: #ff2d55;
+        }
+
+        .chart-days {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            color: #2d5070;
+        }
+
+        .chart-legend {
+            margin-top: 16px;
+            display: flex;
+            gap: 16px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #2d5070;
+        }
+
+        /* ── TOAST ───────────────────────────────────────────── */
+        #toast {
+            position: fixed;
+            bottom: -100px;
+            right: 24px;
+            z-index: 9999;
+            background: #0a1520;
+            border: 1px solid #00ffcc;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
+            padding: 14px 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #00ffcc;
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+            transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #toast.show {
+            bottom: 24px;
+        }
+
+        /* ── LOADING OVERLAY ─────────────────────────────────── */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 5, 8, 0.9);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #00c8ff;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 200, 255, 0.2);
+            border-top-color: #00c8ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #020508;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 200, 255, 0.18);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 200, 255, 0.35);
+        }
+
+        .sql-box {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #6a9ab8;
+            background: #050d14;
+            padding: 16px;
+            border: 1px solid rgba(0, 200, 255, 0.08);
+            overflow-x: auto;
+            line-height: 1.8;
+            white-space: pre;
+        }
+
+        .sql-comment {
+            color: #2d5070;
+        }
+
+        .sql-keyword {
+            color: #00c8ff;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 16px 28px;
+            margin-top: auto;
+            border-top: 1px solid rgba(0, 180, 255, 0.08);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #2d5070;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="logo">
+            <div style="width:48px;height:48px;flex-shrink:0">
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+
+                    <!-- Glow -->
+                    <defs>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="1.8" result="blur" />
+                            <feMerge>
+                                <feMergeNode in="blur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Shield -->
+                    <path d="M24 4 L40 10 V22 C40 32 33 40 24 44 C15 40 8 32 8 22 V10 Z" fill="rgba(0,180,255,0.08)"
+                        stroke="#00bfff" stroke-width="2" filter="url(#glow)" />
+
+                    <!-- Radar circle -->
+                    <circle cx="24" cy="22" r="8" stroke="rgba(0,191,255,0.4)" stroke-width="1.5" fill="none" />
+
+                    <!-- Radar sweep line -->
+                    <line x1="24" y1="22" x2="30" y2="18" stroke="#00bfff" stroke-width="2" stroke-linecap="round" />
+
+                    <!-- Center detection dot -->
+                    <circle cx="24" cy="22" r="2.5" fill="#00bfff" />
+
+                </svg>
+            </div>
+            <div>
+                <div class="logo-text">BLUE DEFENSE</div>
+                <div class="logo-sub">THREAT INTELLIGENCE PLATFORM</div>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="status-badge">
+                <div class="status-dot"></div> NO DB CONNECTION
+            </div>
+            <div class="topbar-time" id="clock">00:00:00 UTC</div>
+        </div>
+    </div>
+
+    <!-- APP CONTAINER -->
+    <div class="app-container">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <span class="nav-section-label">Navigation</span>
+            <div class="nav-items">
+                <button class="nav-item active" onclick="switchPage('dashboard', this)">◈ Dashboard</button>
+                <button class="nav-item" onclick="switchPage('search', this)">⌕ Search Engine</button>
+                <button class="nav-item" onclick="switchPage('alerts', this)">⚠ System Alerts</button>
+                <button class="nav-item" onclick="switchPage('sources', this)">◎ Sources</button>
+                <button class="nav-item" onclick="switchPage('actors', this)">◉ Threat Actors</button>
+            </div>
+
+            <div class="db-status-block">
+                <div>DB HOST: <span>STATIC GITHUB PAGES</span></div>
+                <div>SCHEMA: <span style="color:#ff2d55">UNAVAILABLE</span></div>
+                <div>MODE: <span>UI DESIGN ONLY</span></div>
+                <div style="margin-top:6px" class="disconnected">✗ DISCONNECTED</div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- PAGE 1: DASHBOARD -->
+            <div id="page-dashboard" class="page active">
+                <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 24px;">
+                    <div style="flex: 3;">
+                        <div class="page-header" style="margin-bottom:0; border:none; padding-bottom:0;">
+                            <div>
+                                <div class="page-title">THREAT <span style="color:#00c8ff">OVERVIEW</span></div>
+                                <div class="page-subtitle">// REAL-TIME INTELLIGENCE DASHBOARD</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <button class="btn w-full" onclick="handleFetch()">↻ FETCH LATEST THREAT INTEL</button>
+                    </div>
+                </div>
+                <div style="border-bottom:1px solid rgba(0,180,255,0.12); margin-bottom: 24px;"></div>
+
+                <div class="grid-4">
+                    <div class="metric-card" style="--ca:#00c8ff">
+                        <div class="metric-label">// Total Indicators</div>
+                        <div class="metric-value" style="color:#00c8ff" id="met-ind">0</div>
+                        <div class="metric-delta" style="color:#2d5070">↑ Active tracking</div>
+                    </div>
+                    <div class="metric-card" style="--ca:#00ffcc">
+                        <div class="metric-label">// Total Sightings</div>
+                        <div class="metric-value" style="color:#00ffcc" id="met-sig">0</div>
+                        <div class="metric-delta" style="color:#2d5070">↑ Live count</div>
+                    </div>
+                    <div class="metric-card" id="card-anom" style="--ca:#00c8ff">
+                        <div class="metric-label">// Active Anomalies</div>
+                        <div class="metric-value" style="color:#00c8ff" id="met-anom">0</div>
+                        <div class="metric-delta" id="met-anom-lbl" style="color:#00c8ff">✓ All clear</div>
+                    </div>
+                    <div class="metric-card" style="--ca:#ffc107">
+                        <div class="metric-label">// Threat Sources</div>
+                        <div class="metric-value" style="color:#ffc107" id="met-src">5</div>
+                        <div class="metric-delta" style="color:#2d5070">URLhaus + others</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Recent Indicators</div>
+                        <div class="panel-badge">LAST 10 ENTRIES</div>
+                    </div>
+                    <table class="st" id="dash-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Confidence</th>
+                                <th>First Seen</th>
+                                <th>Last Seen</th>
+                                <th>Actor</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="grid-2">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">Activity Log</div>
+                            <div class="panel-badge">LIVE</div>
+                        </div>
+                        <div id="activity-feed" style="min-height: 200px;"></div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">Sighting Counts</div>
+                            <div class="panel-badge">7-DAY</div>
+                        </div>
+                        <div class="chart-outer">
+                            <div class="chart-sublabel">DAILY SIGHTINGS VOLUME — SPIKE DETECTION</div>
+                            <div class="chart-wrap" id="dash-chart">
+                                <!-- Bars rendered by JS -->
+                            </div>
+                            <div class="chart-days">
+                                <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+                            </div>
+                            <div class="chart-legend">
+                                <span><span style="color:#00c8ff">─</span> Normal</span>
+                                <span><span style="color:#ff2d55">─</span> Anomaly (Z &gt; 3.0)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 2: SEARCH ENGINE -->
+            <div id="page-search" class="page">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">INDICATOR <span style="color:#00c8ff">SEARCH</span></div>
+                        <div class="page-subtitle">// QUERY INDICATORS, SIGHTINGS AND ACTOR CORRELATIONS</div>
+                    </div>
+                </div>
+
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Enter IP address, URL, domain, or hash...  (e.g. 185.220.101.42)"
+                        onkeydown="if(event.key==='Enter') performSearch()">
+                    <button class="btn" onclick="performSearch()">⌕ QUERY</button>
+                </div>
+
+                <div id="search-results">
+                    <div class="no-result">
+                        <span class="nr-icon">⌕</span>
+                        <p>Enter an indicator above to query the Blue Defense database</p>
+                        <p style="margin-top:8px;font-size:11px;color:#2d5070">Supports: IP • URL • Domain • Hash</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: SYSTEM ALERTS -->
+            <div id="page-alerts" class="page">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">SYSTEM <span style="color:#ff2d55">ALERTS</span></div>
+                        <div class="page-subtitle">// Z-SCORE ANOMALY DETECTION — STATISTICAL THREAT ESCALATION</div>
+                    </div>
+                </div>
+
+                <div id="alerts-banner"></div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Anomaly Records</div>
+                        <div class="panel-badge">BLUE_DEFENSE_DB.ANOMALIES</div>
+                    </div>
+                    <table class="st" id="alerts-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Indicator Value</th>
+                                <th>Type</th>
+                                <th>Severity</th>
+                                <th>Z-Score</th>
+                                <th>Detection Reason</th>
+                                <th>Detected At</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PAGE 4: SOURCES -->
+            <div id="page-sources" class="page">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">THREAT <span style="color:#00c8ff">SOURCES</span></div>
+                        <div class="page-subtitle">// BLUE_DEFENSE_DB.SOURCES — INGESTION PIPELINES</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Registered Sources</div>
+                        <div class="panel-badge">5 TOTAL</div>
+                    </div>
+                    <table class="st">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Reliability</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="color:#2d5070">1</td>
+                                <td style="color:#00c8ff">URLhaus</td>
+                                <td><span class="sc sc-crit">10/10</span></td>
+                                <td style="color:#6a9ab8">Abuse.ch malware URL database</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#2d5070">2</td>
+                                <td style="color:#00c8ff">Feodo Tracker</td>
+                                <td><span class="sc sc-high">9/10</span></td>
+                                <td style="color:#6a9ab8">Botnet C2 infrastructure</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#2d5070">3</td>
+                                <td style="color:#00c8ff">ThreatFox</td>
+                                <td><span class="sc sc-med">8/10</span></td>
+                                <td style="color:#6a9ab8">IOC sharing platform</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#2d5070">4</td>
+                                <td style="color:#00c8ff">MalwareBazaar</td>
+                                <td><span class="sc sc-med">8/10</span></td>
+                                <td style="color:#6a9ab8">Malware sample hashes</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#2d5070">5</td>
+                                <td style="color:#00c8ff">AlienVault OTX</td>
+                                <td><span class="sc sc-low">7/10</span></td>
+                                <td style="color:#6a9ab8">Community threat intelligence</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PAGE 5: THREAT ACTORS -->
+            <div id="page-actors" class="page">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">THREAT <span style="color:#00c8ff">ACTORS</span></div>
+                        <div class="page-subtitle">// BLUE_DEFENSE_DB.THREAT_ACTORS — ADVERSARY PROFILES</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Known Adversaries</div>
+                        <div class="panel-badge">5 TRACKED</div>
+                    </div>
+                    <table class="st">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Origin</th>
+                                <th>Target Sector</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="color:#2d5070">1</td>
+                                <td style="color:#ff2d55;font-weight:600">APT28</td>
+                                <td style="color:#6a9ab8">Russia</td>
+                                <td><span class="sc sc-crit">Government</span></td>
+                                <td style="color:#6a9ab8">State-sponsored espionage group</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#2d5070">2</td>
+                                <td style="color:#ff2d55;font-weight:600">Lazarus Group</td>
+                                <td style="color:#6a9ab8">North Korea</td>
+                                <td><span class="sc sc-high">Finance / Crypto</span></td>
+                                <td style="color:#6a9ab8">DPRK cyber operations unit</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#2d5070">3</td>
+                                <td style="color:#ff2d55;font-weight:600">Cobalt Spider</td>
+                                <td style="color:#6a9ab8">Ukraine</td>
+                                <td><span class="sc sc-high">Banking</span></td>
+                                <td style="color:#6a9ab8">Financial sector targeting</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#2d5070">4</td>
+                                <td style="color:#ff2d55;font-weight:600">FIN7</td>
+                                <td style="color:#6a9ab8">Unknown</td>
+                                <td><span class="sc sc-med">Retail / Hospitality</span></td>
+                                <td style="color:#6a9ab8">Point-of-sale malware campaigns</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#2d5070">5</td>
+                                <td style="color:#ff2d55;font-weight:600">Kimsuky</td>
+                                <td style="color:#6a9ab8">North Korea</td>
+                                <td><span class="sc sc-med">Research / Academia</span></td>
+                                <td style="color:#6a9ab8">Intelligence gathering operation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="footer">
+                BLUE DEFENSE&nbsp;·&nbsp; Threat Intelligence&nbsp;·&nbsp; Dashboard
+            </div>
+
+        </main>
+    </div>
+
+    <!-- UI ELEMENTS -->
+    <div id="toast"></div>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div>CONNECTING TO DATABASE...</div>
+    </div>
+
+    <script>
+        // ── TIME SYNC ─────────────────────────────────────────
+        setInterval(() => {
+            const d = new Date();
+            const timeStr = d.toLocaleTimeString('en-US', { timeZone: 'Asia/Dhaka', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('clock').innerText = timeStr + ' BST';
+        }, 1000);
+
+        // ── NAVIGATION ────────────────────────────────────────
+        function switchPage(pageId, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (pageId === 'dashboard') fetchDashboard();
+            if (pageId === 'alerts') fetchAlerts();
+        }
+
+        // ── MOCK DATABASE (STAYS EMPTY) ───────────────────────
+        let db = {
+            indicators: [],
+            sightings: [],
+            anomalies: [],
+            totalSightings: 0
+        };
+
+        // UI Helpers
+        const tbadge = (t) => {
+            const m = { "IP": "tb-ip", "URL": "tb-url", "Hash": "tb-hash", "Domain": "tb-domain" };
+            return `<span class="tb ${m[t] || 'tb-url'}">${t}</span>`;
+        };
+        const sbadge = (s) => {
+            const m = { "Critical": "sc-crit", "High": "sc-high", "Medium": "sc-med", "Low": "sc-low" };
+            return `<span class="sc ${m[s] || 'sc-low'}">${s.toUpperCase()}</span>`;
+        };
+        const cfbar = (v) => {
+            let c = v >= 80 ? "cf-hi" : v >= 60 ? "cf-md" : "cf-lo";
+            return `<div class="cfbar"><div class="cft"><div class="cff ${c}" style="width:${v}%"></div></div><span style="color:#2d5070;font-size:11px">${v}</span></div>`;
+        };
+        const zbar = (v) => {
+            let pct = Math.min((v / 10) * 100, 100);
+            return `<div class="zbar"><div class="zt"><div class="zf" style="width:${pct}%"></div></div><span style="color:#ff2d55;font-size:12px;font-family:'Share Tech Mono',monospace">${v.toFixed(2)}</span></div>`;
+        };
+
+        // ── RENDER ENGINE (API CONNECTED) ─────────────────────
+        function showDbDisconnected() {
+            document.querySelector('.status-dot').style.background = '#ff2d55';
+            document.querySelector('.status-dot').style.boxShadow = '0 0 8px #ff2d55';
+            document.querySelector('.status-badge').innerHTML = '<div class="status-dot"></div> NO DB CONNECTION';
+            document.querySelector('.db-status-block').innerHTML = '<div>DB HOST: <span>localhost</span></div><div>SCHEMA: <span style="color:#ff2d55">UNAVAILABLE</span></div><div style="margin-top:6px" class="disconnected"><span style="color:#ff2d55">✗ DISCONNECTED</span></div>';
+
+            // Set metrics to 0 or defaults
+            document.getElementById('met-ind').innerText = '0';
+            document.getElementById('met-sig').innerText = '0';
+            document.getElementById('met-anom').innerText = '0';
+            document.getElementById('met-src').innerText = '0';
+
+            const acard = document.getElementById('card-anom');
+            const albl = document.getElementById('met-anom-lbl');
+            acard.style.setProperty('--ca', '#ff2d55');
+            document.getElementById('met-anom').style.color = '#ff2d55';
+            albl.style.color = '#ff2d55';
+            albl.innerText = '✗ Offline';
+
+            document.querySelector('#dash-table tbody').innerHTML = `<tr><td colspan="7"><div class="no-result"><p>Database is offline.</p><p style="margin-top:8px;font-size:11px;color:#2d5070">Please start the MySQL server and execute database_setup.sql</p></div></td></tr>`;
+            document.getElementById('activity-feed').innerHTML = `<div style="padding:18px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#2d5070">Database disconnected.</div>`;
+        }
+
+        async function fetchDashboard() {
+            try {
+                const res = await fetch('/api/dashboard');
+                const data = await res.json();
+                if (data.success === false) {
+                    showDbDisconnected();
+                    return;
+                }
+                renderDashboard(data);
+            } catch (err) {
+                console.error("Dashboard fetch error: ", err);
+                showDbDisconnected();
+                showToast("Failed to fetch dashboard data. Make sure Flask API is running.", true);
+            }
+        }
+
+        function renderDashboard(data) {
+            document.querySelector('.status-dot').style.background = '#00ffcc';
+            document.querySelector('.status-dot').style.boxShadow = '0 0 8px #00ffcc';
+            document.querySelector('.status-badge').innerHTML = '<div class="status-dot"></div> LIVE MONITORING';
+            document.querySelector('.db-status-block').innerHTML = '<div>DB HOST: <span>localhost</span></div><div>SCHEMA: <span style="color:#00ffcc">blue_db</span></div><div style="margin-top:6px" class="connected"><span style="color:#00ffcc">● CONNECTED</span></div>';
+
+            document.getElementById('met-ind').innerText = data.metrics.indicators;
+            document.getElementById('met-sig').innerText = data.metrics.sightings;
+
+            const aLen = data.metrics.anomalies;
+            document.getElementById('met-anom').innerText = aLen;
+            const acard = document.getElementById('card-anom');
+            const albl = document.getElementById('met-anom-lbl');
+
+            if (aLen > 0) {
+                acard.style.setProperty('--ca', '#ff2d55');
+                document.getElementById('met-anom').style.color = '#ff2d55';
+                albl.style.color = '#ff2d55';
+                albl.innerText = '⚠ Requires review';
+            } else {
+                acard.style.setProperty('--ca', '#00c8ff');
+                document.getElementById('met-anom').style.color = '#00c8ff';
+                albl.style.color = '#00c8ff';
+                albl.innerText = '✓ All clear';
+            }
+
+            document.getElementById('met-src').innerText = data.metrics.sources;
+
+            // Table
+            const tbody = document.querySelector('#dash-table tbody');
+            if (data.recent.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7"><div class="no-result"><p>Database is empty.</p><p style="margin-top:8px;font-size:11px;color:#2d5070">Requires Python backend to populate records.</p></div></td></tr>`;
+            } else {
+                let rRows = '';
+                data.recent.forEach(r => {
+                    let ac = r.actor !== '—' ? '#ff6b1a' : '#2d5070';
+                    rRows += `<tr>
+                      <td style="color:#2d5070">${r.id}</td>
+                      <td>${tbadge(r.type)}</td>
+                      <td style="color:#cce8f4" title="${r.value}">${r.value.substring(0, 55)}${r.value.length > 55 ? '…' : ''}</td>
+                      <td>${cfbar(r.conf)}</td>
+                      <td style="color:#2d5070">${r.fs || '—'}</td>
+                      <td style="color:#2d5070">${r.ls || '—'}</td>
+                      <td style="color:${ac}">${r.actor}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = rRows;
+            }
+
+            // Activity Feed
+            const afeed = document.getElementById('activity-feed');
+            if (data.activity.length === 0) {
+                afeed.innerHTML = `<div style="padding:18px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#2d5070">No activity logged in database.</div>`;
+            } else {
+                let aRows = '';
+                data.activity.forEach(a => {
+                    let dot = Number(a.cnt) >= 100 ? '#ff2d55' : '#00c8ff';
+                    aRows += `<div class="activity-item">
+                        <div class="activity-dot" style="background:${dot};box-shadow:0 0 6px ${dot}"></div>
+                        <div class="activity-text">${a.msg}</div>
+                        <div class="activity-time">${a.t}</div></div>`;
+                });
+                afeed.innerHTML = aRows;
+            }
+
+            // Chart Generation
+            const chart = document.getElementById('dash-chart');
+            const dayEls = document.querySelector('.chart-days');
+            if (data.chart.length > 0) {
+                let chartHtml = '';
+                let daysHtml = '';
+                let maxTotal = Math.max(...data.chart.map(o => o.total));
+                if (maxTotal === 0) maxTotal = 1;
+
+                data.chart.forEach(d => {
+                    let pct = Math.floor((d.total / maxTotal) * 100);
+                    if (pct < 2) pct = 2;
+                    let sp = (d.total === maxTotal && maxTotal > 50);
+                    let cls = sp ? "chart-bar spike" : "chart-bar";
+                    let lbl = sp ? "SPIKE" : d.total.toString();
+
+                    chartHtml += `<div class="${cls}" style="height:${pct}%"><div class="lbl">${lbl}</div></div>`;
+                    daysHtml += `<span>${d.day}</span>`;
+                });
+                chart.innerHTML = chartHtml;
+                dayEls.innerHTML = daysHtml;
+            }
+        }
+
+        async function fetchAlerts() {
+            try {
+                const res = await fetch('/api/alerts');
+                const data = await res.json();
+                renderAlerts(data);
+            } catch (err) {
+                console.error("Alerts fetch error: ", err);
+            }
+        }
+
+        function renderAlerts(data) {
+            const banner = document.getElementById('alerts-banner');
+            const tbody = document.querySelector('#alerts-table tbody');
+
+            if (!data.anomalies || data.anomalies.length === 0) {
+                banner.innerHTML = `<div style="background:rgba(0,255,204,0.05);border:1px solid rgba(0,255,204,0.2);padding:14px 20px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#00ffcc;margin-bottom:16px">✅ NO ANOMALIES DETECTED — ALL INDICATORS WITHIN NORMAL RANGE</div>`;
+                tbody.innerHTML = `<tr><td colspan="7"><div style="padding:20px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:#2d5070">No anomalies triggered.</div></td></tr>`;
+            } else {
+                banner.innerHTML = `<div class="alert-strip"><span class="alert-icon">⚠</span> WARNING: DATABASE ANOMALIES TRIGGERED INTERVENTION REQUIRED</div>`;
+                let tHtml = '';
+                data.anomalies.forEach(a => {
+                    tHtml += `<tr>
+                      <td style="color:#2d5070">${a.anomaly_id}</td>
+                      <td style="color:#cce8f4">${a.indicator.substring(0, 50)}</td>
+                      <td>${tbadge(a.type)}</td>
+                      <td>${sbadge(a.severity)}</td>
+                      <td>${zbar(a.z_score)}</td>
+                      <td style="color:#2d5070;font-size:10px">${a.detection_reason}</td>
+                      <td style="color:#2d5070">${a.detected_at}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = tHtml;
+            }
+        }
+
+        async function performSearch() {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resDiv = document.getElementById('search-results');
+
+            if (!q) {
+                resDiv.innerHTML = `<div class="no-result"><span class="nr-icon">⌕</span><p>Enter an indicator above to query</p></div>`;
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/search?q=' + encodeURIComponent(q));
+                const data = await res.json();
+
+                if (!data.success) {
+                    resDiv.innerHTML = `<div class="no-result"><span class="nr-icon">✗</span><p>No records found for: <span style="color:#00c8ff">${q}</span></p></div>`;
+                } else {
+                    const r = data.result;
+                    resDiv.innerHTML = `<div class="rf">
+                        <div class="grid-2">
+                            <div>
+                              <div class="rl">Indicator Value</div>
+                              <div class="rv">${r.value}</div>
+                            </div>
+                            <div>
+                              <div class="rl">Type</div>
+                              <div class="rv">${tbadge(r.type)}</div>
+                            </div>
+                            <div>
+                              <div class="rl">Threat Actor</div>
+                              <div class="rv" style="color:#ff6b1a">${r.actor || 'Unknown'}</div>
+                            </div>
+                            <div>
+                              <div class="rl">Confidence</div>
+                              <div>${cfbar(r.confidence_score)}</div>
+                            </div>
+                            <div>
+                              <div class="rl">First Seen</div>
+                              <div class="rv" style="color:#6a9ab8">${r.fs}</div>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+            } catch (e) {
+                resDiv.innerHTML = `<div class="no-result"><span class="nr-icon">✗</span><p>Error searching for: <span style="color:#ff2d55">${q}</span></p></div>`;
+            }
+        }
+
+        // ── FETCH HANDLER (API) ──────
+        function showToast(msg, isError) {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = msg;
+            toast.style.borderColor = isError ? '#ff2d55' : '#00ffcc';
+            toast.style.color = isError ? '#ff2d55' : '#00ffcc';
+            toast.style.boxShadow = isError ? '0 0 30px rgba(255,45,85,0.15)' : '0 0 30px rgba(0,255,204,0.15)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        async function handleFetch() {
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                const res = await fetch('/api/fetch', { method: 'POST' });
+                const data = await res.json();
+                document.getElementById('loader').style.display = 'none';
+
+                if (data.success) {
+                    showToast(`✅ Fetch Complete! Downloaded ${data.downloaded} items. Inserted: ${data.inserted}`, false);
+                    fetchDashboard();
+                } else {
+                    showToast(`❌ Fetch Failed: ${data.error}`, true);
+                }
+            } catch (e) {
+                document.getElementById('loader').style.display = 'none';
+                showToast('❌ Network error during fetch.', true);
+            }
+        }
+
+        // Initialize empty state renders
+        fetchDashboard();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+flask
+mysql-connector-python
+pandas
+requests
+schedule
+numpy
+scipy
